@@ -1,6 +1,7 @@
 # Import the required module to handle Windows API Calls
 #https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess
 import ctypes
+from os import remove         #just to delete the temp-file    
 
 # Grab a handle to kernel32.dll
 k_handle = ctypes.WinDLL("Kernel32.dll")
@@ -18,10 +19,19 @@ PROCESS_ALL_ACCESS = (0x000F0000 | 0x00100000 | 0xFFF)   #shortcut for PROCESS_A
 # Setting Up The Params
 dwDesiredAccess = PROCESS_ALL_ACCESS
 bInheritHandle = False
-dwProcessId = 0xc18
-#dwProcessId = hex(int(input("Enter the Process ID : ")))    #int(  ,base) : this converts from a string
-print(dwProcessId) #debug related                                                   #hex() converts to str type : type(hex()) & its input should be int type   
-                                                                    #int(hex()) : to convert hex string to hex number.
+#dwProcessId = 0xc18
+dwProcessId = hex(int(input("Enter the Process ID : ")))    #int(  ,base) : this converts from a string
+                                                            #hex() converts to str type : type(hex()) & its input should be int type
+# Creates a new file 
+with open('myfile.py', 'w') as fp:                   #MY FIX : to convert Hex_string to Hex_int :) 
+    fp.write("hex_id = {0}".format(dwProcessId)) 
+    
+from myfile import hex_id
+dwProcessId = hex_id                                # alternative : print(myfile.hex_id)                      
+print(dwProcessId) #debug related                                      
+
+remove("myfile.py")                                 
+                     
 # Calling the Windows API Call
 response = k_handle.OpenProcess(dwDesiredAccess, bInheritHandle, dwProcessId) #If the function fails, the return value is NULL
                                                                               #this tells that there is a certain type of error
@@ -37,3 +47,5 @@ if response <= 0:
 	print("Handle Not Created!")
 elif response >= 1:                                 #If the function succeeds, the return value is an open handle to the specified process.
 	print("Handle Created!")
+
+
