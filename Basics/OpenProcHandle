@@ -1,0 +1,39 @@
+# Import the required module to handle Windows API Calls
+#https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess
+import ctypes
+
+# Grab a handle to kernel32.dll
+k_handle = ctypes.WinDLL("Kernel32.dll")
+
+# Win API Call
+# HANDLE OpenProcess(
+# DWORD dwDesiredAccess,
+# BOOL bInheritHandle,
+# DWAORD dwProcessId
+# );
+
+# Access Rights
+PROCESS_ALL_ACCESS = (0x000F0000 | 0x00100000 | 0xFFF)   #shortcut for PROCESS_ALL_ACCESS used here . 
+
+# Setting Up The Params
+dwDesiredAccess = PROCESS_ALL_ACCESS
+bInheritHandle = False
+dwProcessId = 0xc18
+#dwProcessId = hex(int(input("Enter the Process ID : ")))    #int(  ,base) : this converts from a string
+print(dwProcessId) #debug related                                                   #hex() converts to str type : type(hex()) & its input should be int type   
+                                                                    #int(hex()) : to convert hex string to hex number.
+# Calling the Windows API Call
+response = k_handle.OpenProcess(dwDesiredAccess, bInheritHandle, dwProcessId) #If the function fails, the return value is NULL
+                                                                              #this tells that there is a certain type of error
+error = k_handle.GetLastError()                              #this is to check the type of error when we get error . 
+if error != 0:                                               #https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
+	print("Handle Not Created!")
+	print("Error Code: {0}".format(error))
+	exit(1)
+
+# Check to see if we have a valid Handle
+print("Handle is {0}".format(response))
+if response <= 0:
+	print("Handle Not Created!")
+elif response >= 1:                                 #If the function succeeds, the return value is an open handle to the specified process.
+	print("Handle Created!")
